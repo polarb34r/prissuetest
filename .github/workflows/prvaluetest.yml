@@ -12,6 +12,8 @@ jobs:
     env:
       GITHUB_HEAD_REF: ${{ github.head_ref }}
       GITHUB_REF_NAME: ${{ github.ref_name }}
+      # Use head_ref if it exists (PRs), otherwise fallback to ref_name
+      BRANCH_NAME: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
 
     steps:
       - name: Print env values using Bash
@@ -27,3 +29,15 @@ jobs:
           Write-Host "Using PowerShell"
           Write-Host "GITHUB_HEAD_REF: $env:GITHUB_HEAD_REF"
           Write-Host "GITHUB_REF_NAME: $env:GITHUB_REF_NAME"
+
+      - name: Show branch name in Bash
+        shell: bash
+        run: |
+          echo "Using Bash:"
+          echo "BRANCH_NAME is: $BRANCH_NAME"
+
+      - name: Show branch name in PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "Using PowerShell:"
+          Write-Host "BRANCH_NAME is: $env:BRANCH_NAME"
