@@ -1,0 +1,29 @@
+name: Test GitHub Context Values
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+
+jobs:
+  test-context:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_HEAD_REF: ${{ github.head_ref }}
+      GITHUB_REF_NAME: ${{ github.ref_name }}
+
+    steps:
+      - name: Print env values using Bash
+        shell: bash
+        run: |
+          echo "Using Bash"
+          echo "GITHUB_HEAD_REF: $GITHUB_HEAD_REF"
+          echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
+
+      - name: Print env values using PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "Using PowerShell"
+          Write-Host "GITHUB_HEAD_REF: $env:GITHUB_HEAD_REF"
+          Write-Host "GITHUB_REF_NAME: $env:GITHUB_REF_NAME"
