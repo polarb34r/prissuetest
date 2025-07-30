@@ -1,0 +1,21 @@
+name: Test PR Default Branch Filtering
+
+on:
+  pull_request:
+
+jobs:
+  run-on-default-branch:
+    if: github.base_ref == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run only on PRs to the default branch
+        run: |
+          echo "✅ This PR targets the default branch: ${{ github.base_ref }}"
+
+  skip-when-not-default:
+    if: github.base_ref != github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip notice
+        run: |
+          echo "⚠️ Skipping main job because this PR targets '${{ github.base_ref }}', not the default branch '${{ github.event.repository.default_branch }}'."
