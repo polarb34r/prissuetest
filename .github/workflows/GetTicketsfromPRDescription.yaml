@@ -26,8 +26,8 @@ jobs:
           $matches = [regex]::Matches($prBody, $regex, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
 
           if ($matches.Count -gt 0) {
-              # Normalizar a mayúsculas para consistencia
-              $tickets = @($matches | ForEach-Object { $_.Value.ToUpper() })
+              # Normalizar a mayúsculas y quitar duplicados
+              $tickets = @($matches | ForEach-Object { $_.Value.ToUpper() } | Select-Object -Unique)
               Write-Host "Tickets encontrados: $($tickets -join ', ')"
 
               $firstTicket = $tickets[0]
@@ -37,7 +37,6 @@ jobs:
               Write-Host "No se encontró ticket. Asignando 'none'."
               echo "FIRST_TICKET=none" >> $env:GITHUB_ENV
           }
-
 
       - name: Use Ticket
         run: echo "Usando el ticket $FIRST_TICKET"
