@@ -21,11 +21,13 @@ jobs:
           $prBody = $env:PR_BODY
           Write-Host "PR Description: $prBody"
 
-          $regex = '\[?(SE-\d+)\]\(https?://[^\)]+\)'
-          $matches = [regex]::Matches($prBody, $regex)
+          # Buscar cualquier ticket con formato SE-12345 o se-12345 (case-insensitive)
+          $regex = 'SE-\d+'
+          $matches = [regex]::Matches($prBody, $regex, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
 
           if ($matches.Count -gt 0) {
-              $tickets = $matches | ForEach-Object { $_.Groups[1].Value }
+              # Normalizar a mayúsculas para consistencia
+              $tickets = @($matches | ForEach-Object { $_.Value.ToUpper() })
               Write-Host "Tickets encontrados: $($tickets -join ', ')"
 
               $firstTicket = $tickets[0]
@@ -35,6 +37,7 @@ jobs:
               Write-Host "No se encontró ticket. Asignando 'none'."
               echo "FIRST_TICKET=none" >> $env:GITHUB_ENV
           }
+
 
       - name: Use Ticket
         run: echo "Usando el ticket $FIRST_TICKET"
