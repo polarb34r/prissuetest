@@ -1,4 +1,4 @@
-name: Test Gobbling and Word Splitting
+name: Test Gobbling, Word Splitting, and GITHUB_PATH
 
 on:
   workflow_dispatch:
@@ -12,25 +12,28 @@ jobs:
         run: |
           echo "GOOD_VAR=hello-world" >> $GITHUB_ENV
           echo "BAD_VAR=hello world with spaces" >> $GITHUB_ENV
-          echo "SPECIAL_VAR=hello\$with\$dollar\$and'quotes'" >> $GITHUB_ENV
 
-      - name: Show environment
+      - name: Add custom directory to PATH
         run: |
+          mkdir -p "$HOME/mytools"
+          echo 'echo "Hello from custom tool!"' > "$HOME/mytools/mytool"
+          chmod +x "$HOME/mytools/mytool"
+          echo "$HOME/mytools" >> $GITHUB_PATH
+
+      - name: Test PATH and variables
+        run: |
+          echo "Current PATH: $PATH"
           echo "GOOD_VAR=[$GOOD_VAR]"
           echo "BAD_VAR=[$BAD_VAR]"
-          echo "SPECIAL_VAR=[$SPECIAL_VAR]"
+          echo "Running custom tool:"
+          mytool
 
-      - name: Test unsafe usage (no quotes)
+      - name: Test unsafe vs safe usage
         run: |
-          echo "UNSAFE BAD_VAR output:"
+          echo "Unsafe BAD_VAR (no quotes):"
           echo $BAD_VAR
-
-      - name: Test safe usage (with quotes)
-        run: |
-          echo "SAFE BAD_VAR output:"
+          echo "Safe BAD_VAR (quoted):"
           echo "$BAD_VAR"
-          echo "SPECIAL_VAR safely quoted:"
-          echo "$SPECIAL_VAR"
 
   pwsh-test:
     name: Test in PowerShell (Windows)
@@ -41,25 +44,28 @@ jobs:
         run: |
           "GOOD_VAR=hello-world" | Out-File -FilePath $env:GITHUB_ENV -Append
           "BAD_VAR=hello world with spaces" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "SPECIAL_VAR=hello`$with`$dollar`$and'quotes'" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Show environment
+      - name: Add custom directory to PATH
         shell: pwsh
         run: |
+          $customPath = "$env:USERPROFILE\mytools"
+          New-Item -ItemType Directory -Force -Path $customPath | Out-Null
+          Set-Content -Path "$customPath\mytool.bat" -Value "@echo off`necho Hello from custom tool!"
+          $customPath | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Test PATH and variables
+        shell: pwsh
+        run: |
+          Write-Host "Current PATH: $env:PATH"
           Write-Host "GOOD_VAR=[$env:GOOD_VAR]"
           Write-Host "BAD_VAR=[$env:BAD_VAR]"
-          Write-Host "SPECIAL_VAR=[$env:SPECIAL_VAR]"
+          Write-Host "Running custom tool:"
+          mytool
 
-      - name: Test unsafe usage (unquoted)
+      - name: Test unsafe vs safe usage
         shell: pwsh
         run: |
-          Write-Host "UNSAFE BAD_VAR output:"
+          Write-Host "Unsafe BAD_VAR (unquoted):"
           Write-Host $env:BAD_VAR
-
-      - name: Test safe usage (quoted)
-        shell: pwsh
-        run: |
-          Write-Host "SAFE BAD_VAR output:"
+          Write-Host "Safe BAD_VAR (quoted):"
           Write-Host "$env:BAD_VAR"
-          Write-Host "SPECIAL_VAR safely quoted:"
-          Write-Host "$env:SPECIAL_VAR"
