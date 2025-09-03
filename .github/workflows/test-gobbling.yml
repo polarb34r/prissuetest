@@ -1,0 +1,65 @@
+name: Test Gobbling and Word Splitting
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bash-test:
+    name: Test in Bash (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "GOOD_VAR=hello-world" >> $GITHUB_ENV
+          echo "BAD_VAR=hello world with spaces" >> $GITHUB_ENV
+          echo "SPECIAL_VAR=hello\$with\$dollar\$and'quotes'" >> $GITHUB_ENV
+
+      - name: Show environment
+        run: |
+          echo "GOOD_VAR=[$GOOD_VAR]"
+          echo "BAD_VAR=[$BAD_VAR]"
+          echo "SPECIAL_VAR=[$SPECIAL_VAR]"
+
+      - name: Test unsafe usage (no quotes)
+        run: |
+          echo "UNSAFE BAD_VAR output:"
+          echo $BAD_VAR
+
+      - name: Test safe usage (with quotes)
+        run: |
+          echo "SAFE BAD_VAR output:"
+          echo "$BAD_VAR"
+          echo "SPECIAL_VAR safely quoted:"
+          echo "$SPECIAL_VAR"
+
+  pwsh-test:
+    name: Test in PowerShell (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Set environment variables
+        shell: pwsh
+        run: |
+          "GOOD_VAR=hello-world" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "BAD_VAR=hello world with spaces" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "SPECIAL_VAR=hello`$with`$dollar`$and'quotes'" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Show environment
+        shell: pwsh
+        run: |
+          Write-Host "GOOD_VAR=[$env:GOOD_VAR]"
+          Write-Host "BAD_VAR=[$env:BAD_VAR]"
+          Write-Host "SPECIAL_VAR=[$env:SPECIAL_VAR]"
+
+      - name: Test unsafe usage (unquoted)
+        shell: pwsh
+        run: |
+          Write-Host "UNSAFE BAD_VAR output:"
+          Write-Host $env:BAD_VAR
+
+      - name: Test safe usage (quoted)
+        shell: pwsh
+        run: |
+          Write-Host "SAFE BAD_VAR output:"
+          Write-Host "$env:BAD_VAR"
+          Write-Host "SPECIAL_VAR safely quoted:"
+          Write-Host "$env:SPECIAL_VAR"
