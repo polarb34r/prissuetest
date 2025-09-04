@@ -1,0 +1,81 @@
+name: Test GITHUB_PATH Usage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bash-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show initial PATH
+        run: echo "$PATH"
+
+      - name: Correct - quoted $GITHUB_PATH
+        run: |
+          mkdir -p "$PWD/test1"
+          echo "$PWD/test1" >> "$GITHUB_PATH"
+
+      - name: Correct - unquoted $GITHUB_PATH
+        run: |
+          mkdir -p "$PWD/test2"
+          echo "$PWD/test2" >> $GITHUB_PATH
+
+      - name: Wrong - quoted literal GITHUB_PATH
+        run: |
+          mkdir -p "$PWD/test3"
+          echo "$PWD/test3" >> "GITHUB_PATH"
+
+      - name: Wrong - unquoted literal GITHUB_PATH
+        run: |
+          mkdir -p "$PWD/test4"
+          echo "$PWD/test4" >> GITHUB_PATH
+
+      - name: Check results
+        run: |
+          echo "---- PATH after updates ----"
+          echo "$PATH"
+          echo "---- Files in workspace ----"
+          ls -l
+          echo "---- Contents of literal GITHUB_PATH file ----"
+          cat GITHUB_PATH || echo "No file"
+
+  pwsh-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show initial PATH
+        shell: pwsh
+        run: echo $env:PATH
+
+      - name: Correct - quoted $env:GITHUB_PATH
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$PWD/test1" | Out-Null
+          "$PWD/test1" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Correct - unquoted $env:GITHUB_PATH
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$PWD/test2" | Out-Null
+          "$PWD/test2" | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Wrong - quoted literal GITHUB_PATH
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$PWD/test3" | Out-Null
+          "$PWD/test3" | Out-File -FilePath "GITHUB_PATH" -Append -Encoding utf8
+
+      - name: Wrong - unquoted literal GITHUB_PATH
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$PWD/test4" | Out-Null
+          "$PWD/test4" | Out-File GITHUB_PATH -Append -Encoding utf8
+
+      - name: Check results
+        shell: pwsh
+        run: |
+          Write-Host "---- PATH after updates ----"
+          Write-Host $env:PATH
+          Write-Host "---- Files in workspace ----"
+          Get-ChildItem
+          Write-Host "---- Contents of literal GITHUB_PATH file ----"
+          Get-Content GITHUB_PATH -ErrorAction SilentlyContinue
