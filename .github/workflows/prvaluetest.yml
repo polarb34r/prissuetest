@@ -17,15 +17,17 @@ jobs:
 
     steps:
       - name: Dump Pull Request GitHub Event to PowerShell Log
-        shell: powershell
+        shell: pwsh
         run: |
-          # The github.event context is a JSON object. We use ConvertFrom-Json to parse it into a PowerShell object.
-          $prEvent = '${{ toJSON(github.event) }}' | ConvertFrom-Json
-          
-          # 1. Print the entire event object (useful for debugging)
-          Write-Host "... Full PR Event Object ..."
-          $prEvent | ConvertTo-Json -Depth 100 | Write-Host
-          Write-Host "... last Full PR Event Object ..."
+            # The github.event context is a JSON object. We use ConvertFrom-Json to parse it into a PowerShell object.
+            $prEvent = @"
+            ${{ toJSON(github.event) }}
+            "@ | ConvertFrom-Json
+            
+            # 1. Print the entire event object (useful for debugging)
+            Write-Host "--- Full PR Event Object ---"
+            $prEvent | ConvertTo-Json -Depth 100 | Write-Host
+
     
       - name: Print env values using Bash
         shell: bash
