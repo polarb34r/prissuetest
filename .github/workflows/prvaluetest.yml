@@ -27,6 +27,12 @@ jobs:
             # 1. Print the entire event object (useful for debugging)
             Write-Host "--- Full PR Event Object ---"
             $prEvent | ConvertTo-Json -Depth 100 | Write-Host
+             # Remove only quotes and backticks
+            $cleanDescription = $description -replace '["''`]', ''
+            Write-Host "--- Original Description ---"
+            Write-Host $description
+            Write-Host "`n--- Cleaned (Basic) Description ---"
+            Write-Host $cleanDescription
 
     
       - name: Print env values using Bash
