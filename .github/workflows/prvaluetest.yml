@@ -27,6 +27,9 @@ jobs:
             # 1. Print the entire event object (useful for debugging)
             Write-Host "--- Full PR Event Object ---"
             $prEvent | ConvertTo-Json -Depth 100 | Write-Host
+            
+            # Extract PR description
+            $description = $prEvent.pull_request.body
              # Remove only quotes and backticks
             $cleanDescription = $description -replace '["''`]', ''
             Write-Host "--- Original Description ---"
