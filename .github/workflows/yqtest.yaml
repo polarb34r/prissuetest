@@ -14,6 +14,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+     
+      # 🧪 Validate installation and functionality
+      - name: Validate yq installation
+        run: |
+          echo "Checking version..."
+          yq --version
+
+          echo "Testing yq basic usage..."
+          echo 'foo: bar' > test.yaml
+          VALUE=$(yq '.foo' test.yaml)
+          
+          echo "Extracted value: $VALUE"
+          
+          if [ "$VALUE" != "bar" ]; then
+            echo "❌ yq validation failed: expected 'bar', got '$VALUE'"
+            exit 0
+          fi
+
+          echo "✅ yq validation succeeded!"
 
       # ✅ Install the latest yq
       - name: Install yq
