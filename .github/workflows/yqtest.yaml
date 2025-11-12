@@ -1,0 +1,43 @@
+name: Install and Validate yq
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  install-yq:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ✅ Install the latest yq
+      - name: Install yq
+        run: |
+          echo "Downloading latest yq binary..."
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+          echo "✅ yq installed successfully"
+
+      # 🧪 Validate installation and functionality
+      - name: Validate yq installation
+        run: |
+          echo "Checking version..."
+          yq --version
+
+          echo "Testing yq basic usage..."
+          echo 'foo: bar' > test.yaml
+          VALUE=$(yq '.foo' test.yaml)
+          
+          echo "Extracted value: $VALUE"
+          
+          if [ "$VALUE" != "bar" ]; then
+            echo "❌ yq validation failed: expected 'bar', got '$VALUE'"
+            exit 1
+          fi
+
+          echo "✅ yq validation succeeded!"
